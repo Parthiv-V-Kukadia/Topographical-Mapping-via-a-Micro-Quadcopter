@@ -1,0 +1,23 @@
+The key milestone this week will be to understand and implement how to get the absolute and relative z-position of the drone. When attempting to create a topographical map of the grid that is being recorded, it is crucial to understand what data the drone is able to provide and how that data can translate into a topographical map. There are 2 ways that will be explored in understanding how to obtain the absolute and relative z-position of the drone. The first one is using a loco-positioning system, and the second one is using the z-position data of the drone. Understanding how to implement both methods will be the starting point after which the pros and cons of the different methods will be evaluated to determine the final method used in this project. Once a method is identified, it will be implemented in a flight test where the drone will be flown in a straight line over an object of known height. Then the z-data will be extracted to see if the drone was able to provide the x, y, and z position of the object. 
+
+The first milestone for the week of November 1 was to identify the pros and cons of the 2 methods and choose the method best suited for this project. The pros and cons for both methods are given in Table \ref{Table 1}. The pros for the loco positioning system include the measurement of absolute z position and ability to map an object of unknown height. The cons for this same method are the unfamiliarity with the loco positioning system and the need for an additional deck, anchors, and tags which are quite expensive. Pros of the second method include the ease of implementation as well as no additional materials being needed. The downsides to this method are that measurement of objects of unknown height is not possible and that error in the data could be due to the controller as opposed to object detection. \\
+Due to the time constraint of the project, the second method was chosen for the implementation.
+\begin{center}
+    \captionof{table}{\textbf{Pros and Cons for the 2 methods proposed}}
+    {
+    \medium
+    
+    \begin{tabular}{|c|c|c|}
+        \rowcolor{lightgray}
+        \hline
+        {{\textbf{Method} & \textbf{Pros} & \textbf{Cons}}} \\
+        \hline
+        {\makecell{Loco Positioning \\ System} & \makecell{-Able to measure \\ absolute z position \\ -Map out the object \\ of unknown height}& \makecell{-Additional deck required \\ + anchors and tags \\ -Unknown deck, don't exactly know \\ how the loco positioning works}} \\
+        \hline
+        \makecell{z position data} & \makecell{-Easy to implement; \\don't need additional material \\ -Easy to implement because \\ the method is known}& \makecell{-Can't do unknown \\ object heights \\ -The error could be greater \\ because of the controller \\ which would result into inaccurate \\ topographical map}
+        \\
+        \hline
+    \end{tabular}
+    }
+    \label{Table 1}
+\end{center}

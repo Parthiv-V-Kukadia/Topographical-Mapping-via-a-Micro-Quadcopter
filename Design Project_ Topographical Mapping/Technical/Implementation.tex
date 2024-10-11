@@ -1,0 +1,136 @@
+The controller design that is derived in the following sections was not used due to its inability to have the drone follow the pattern shown on Fig \ref{fig:lawnmower}. The time constraint of the project made it impossible to change the controller design so that the drone could follow this pattern which is why the default controller and observer were used to collect all the data provided in Section \ref{R&D}.
+
+\subsection{Equations of Motion}
+The equations of motion for the drone are given as follows:
+\begin{equation}
+    \label{eqt 1}
+    \dot{o}_{1}^{0} = R_{1}^{0}v_{0,1}^{1}
+    \qquad\qquad
+    \begin{bmatrix}
+    \dot{\psi} \\ \dot{\theta} \\ \dot{\phi}
+    \end{bmatrix} = N\omega_{0,1}^{1}
+\end{equation}
+
+\begin{equation}
+    \label{eqt 2}
+    f' = m\dot{v}'_{0,1} + \omega'_{0,1}\times (mv'_{0,1})
+\end{equation}
+\begin{equation}
+    \label{eqt 3}
+    \tau' = J'\dot{\omega}'_{0,1} + \omega'_{0,1}\times (J'\omega'_{0,1})
+\end{equation}
+where $R$ and $N$ are given as:
+\begin{equation}
+    R = \begin{bmatrix}
+    \cos{\psi}\cos{\theta} & \sin{\phi}\sin{\theta}\cos{\psi}-\sin{\psi}\cos{\phi} & \sin{\phi}\sin{\psi}+\sin{\theta}\cos{\phi}\cos{\psi} \\
+    \sin{\psi}\cos{\theta} & 
+    \sin{\phi}\sin{\psi}\sin{\theta}+\cos{\phi}\cos{\psi} & -\sin{\phi}\cos{\psi}+\sin{\psi}\sin{\theta}\cos{\phi} \\ 
+    -\sin{\theta} & \sin{\phi}\cos{\theta} & \cos{\phi}\cos{\theta}
+    \end{bmatrix}
+\end{equation}
+\begin{equation}
+    N = \begin{bmatrix}
+    0 & \frac{\sin{\phi}}{\cos{\theta}} & \frac{\cos{\phi}}{\cos{\theta}} \\ 
+    0 & \cos{\phi} & -\sin{\phi} \\
+    1 & \sin{\phi}\tan{\theta} & \cos{\phi}\tan{\theta}
+    \end{bmatrix}
+\end{equation}
+The drone has $12$ states, $4$ inputs and $5$ parameters as shown below:
+
+\begin{equation}
+  s = \begin{bmatrix} o_x \\ o_y \\ o_z \\ \psi \\ \theta \\ \phi \\ v_x \\ v_y \\ v_z \\ \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}  
+  \qquad\qquad
+  i = \begin{bmatrix} \tau_x \\ \tau_y \\ \tau_z \\ f_z \end{bmatrix}  
+  \qquad\qquad
+  p = \begin{bmatrix} m \\ J_x \\ J_y \\ J_z \\ g \end{bmatrix}
+\end{equation}
+
+Rearranging equations \ref{eqt 1}-\ref{eqt 2}-\ref{eqt 3} in the form of $\dot{s} = f(s,i,p)$ results into the final form of the equations of motion:
+
+\begin{equation}
+   \begin{bmatrix} o_x \\ o_y \\ o_z \\ \psi \\ \theta \\ \phi \\ v_x \\ v_y \\ v_z \\ \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}  = \begin{bmatrix}
+   v_x\cos{\psi}\cos{\theta}+v_y(\sin{\phi}\sin{\theta}\cos{\psi}-\sin{\psi}\cos{\phi})+v_z(\sin{\phi}\sin{\psi}+\sin{\theta}\cos{\phi}\cos{\psi}) \\
+   v_x\sin{\psi}\cos{\theta}+v_y(\sin{\phi}\sin{\psi}\sin{\theta}+\cos{\phi}\cos{\psi})+v_z(-\sin{\phi}\cos{\psi}+\sin{\psi}\sin{\theta}\cos{\phi}) \\ 
+   -v_x\sin{\theta}+v_y\sin{\phi}\cos{\theta}+v_z\cos{\phi}\cos{\theta} \\
+   \frac{\omega_{y}\sin{\phi}}{\cos{\theta}}+\frac{\omega_{z}\cos{\phi}}{\cos{\theta}} \\ 
+   \omega_{y}\cos{\phi} -\omega_{z}\sin{\phi} \\
+   \omega_x+\omega_{y}\sin{\phi}\tan{\theta}+\omega_{z}\cos{\phi}\tan{\theta} \\ 
+   \vspace{1.5pt}
+   \frac{gm\sin{\theta}+mv_{y}\omega_{z}-mv_{z}\omega_{y}}{m} \\
+   \vspace{2.5pt}
+   \frac{-gm\sin{\phi}\cos{\theta}-mv_{x}\omega_{z}+mv_{z}\omega_{x}}{m} \\
+   \vspace{2.5pt}
+   \frac{f_z-gm\cos{\phi}\cos{\theta}+mv_{x}\omega_{y}-mv_{y}\omega_{x}}{m} \\
+   \vspace{2.5pt}
+   \frac{J_{y}\omega_{y}\omega_{z}-J_{z}\omega_{y}\omega_{z}+\tau_x}{J_x} \\
+   \vspace{2.5pt}
+   \frac{-J_{x}\omega_{x}\omega_{z}+J_{z}\omega_{x}\omega_{z}+\tau_y}{J_y} \\ 
+   \vspace{2.5pt}
+   \frac{J_{x}\omega_{x}\omega_{y}-J_{y}\omega_{x}\omega_{y}+\tau_z}{J_z}
+   \end{bmatrix} 
+\end{equation}
+
+The equations for the inputs can be written in terms of squared rotor speeds, $\sigma$s as follows:
+\begin{equation}
+    \begin{bmatrix} \tau_x \\ \tau_y \\ \tau_z \\ f_z \end{bmatrix}  =\begin{bmatrix}
+    -lk_{F}\sigma_{1}^{2}-lk_{F}\sigma_{2}^{2}+lk_{F}\sigma_{3}^{2}+lk_{F}\sigma_{4}^{2} \\ 
+     -lk_{F}\sigma_{1}^{2}+lk_{F}\sigma_{2}^{2}+lk_{F}\sigma_{3}^{2}-lk_{F}\sigma_{4}^{2} \\
+      -k_{M}\sigma_{1}^{2}+k_{M}\sigma_{2}^{2}-k_{M}\sigma_{3}^{2}+k_{M}\sigma_{4}^{2} \\
+      k_{F}\sigma_{1}^{2}+k_{F}\sigma_{2}^{2}+k_{F}\sigma_{3}^{2}+k_{F}\sigma_{4}^{2}
+    \end{bmatrix}
+\end{equation}
+
+All the constant values like $m,J_x,J_y,J_z,g,l,k_F,k_M$ used in the above equations are given in Table \ref{Table 1}
+
+\newpage
+\begin{center}
+\captionof{table}{\textbf{Constant Values used for the EOMs.}}
+
+    \begin{tabular}{|c|c|}
+        \rowcolor{lightgray} 
+        \hline
+        \textbf{Constant} & \textbf{Value} \\
+        \hline
+        m & 0.0313 kg \\
+        \hline
+        J_x & 1.80\times 10^{-5} kg-m^2 \\
+        \hline
+        J_y & 1.83\times 10^{-5} kg-m^2 \\
+        \hline
+        J_z & 3.17\times 10^{-5} kg-m^2 \\
+        \hline
+        g & 9.81 m/s^2 \\
+        \hline
+        l & 0.035 m \\
+        \hline
+        k_F & 2.04\times 10^{-6} \\
+        \hline
+        k_M & 7.51\times 10^{-9} \\
+        \hline
+\end{tabular}
+\label{Table 1}
+\end{center}
+
+\subsection{State Space Model}
+The state-space model was described from the EOMs as follows:
+
+\begin{equation}
+    \dot{s} = As+Bu
+\end{equation}
+
+where $x=s-s_{eq}$, $u=i-i_{eq}$. $A$ and $B$ were defined as:
+\begin{equation}
+    A = \frac{\partial f}{\partial s}\biggr\rvert_{(s_{e},i_{e},p_{e})} 
+    \qquad\qquad
+    B = \frac{\partial f}{\partial i}\biggr\rvert_{(s_{e},i_{e},p_{e})} 
+\end{equation}
+
+$s_{eq}$ and $i_{eq}$ were chosen as:
+
+\begin{equation}
+    s = \begin{bmatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bmatrix}  
+  \qquad\qquad
+  i = \begin{bmatrix} 0 \\ 0 \\ 0 \\ mg \end{bmatrix}
+\end{equation}
+
+
